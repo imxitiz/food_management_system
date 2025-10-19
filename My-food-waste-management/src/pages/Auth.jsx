@@ -2,6 +2,21 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './auth.css';
 
+export const axiosInstance = axios.create({
+	baseURL: "http://127.0.0.1:8000",
+	headers: {
+		"Content-Type": "application/x-www-form-urlencoded",
+	},
+});
+
+export const convertToFormParams = (obj) => {
+  const params = new URLSearchParams();
+  for (const key in obj) {
+    params.append(key, obj[key]);
+  }
+  return params;
+}
+
 function Auth() {
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({
@@ -29,19 +44,24 @@ function Auth() {
         }
 
         // ✅ Signup API call
-        const res = await axios.post('http://127.0.0.1:8000/auth/signup', {
-          name: form.name,
-          lastname: form.lastname,
-          email: form.email,
-          password: form.password,
-        });
+        const res = await axiosInstance.post(
+          "users",
+          convertToFormParams({
+            name: form.name,
+            lastname: form.lastname,
+            email: form.email,
+            password: form.password,
+          }),
+        );
         alert(res.data.message || 'Signup successful!');
       } else {
-        // ✅ Login API call
-        const res = await axios.post('http://127.0.0.1:8000/auth/login', {
-          email: form.email,
-          password: form.password,
-        });
+        const res = await axiosInstance.post(
+          "auth/login",
+          convertToFormParams({
+            username: form.email,
+            password: form.password,
+          }),
+        );
         alert(res.data.message || 'Login successful!');
       }
     } catch (err) {
